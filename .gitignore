@@ -1,0 +1,4 @@
+# WorkBuddy local files
+*.zip
+*.log
+.DS_Store
