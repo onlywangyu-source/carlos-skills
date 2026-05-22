@@ -48,6 +48,17 @@ This skill stores the user's account credentials in a local skill file. All pass
 | 腾讯云 | `~/.ssh/id_ed25519.pub` | `~/.ssh/id_ed25519` |
 | 腾讯云备用 | N/A (PEM format) | `~/.ssh/WBmiyao.pem` |
 
+### 企业微信会话存档
+
+| Property | Value |
+|----------|-------|
+| **Platform** | 企业微信 (WeCom) |
+| **企业 ID (CorpID)** | `ww1cfe92ce0552bbe8` |
+| **Secret** | `rWsGUeafmS-_Q83aLoSqNVk5vxkv-osHsFsxGPdmq1M` |
+| **RSA 私钥** | 已部署至服务器 `/home/ubuntu/.hermes/private.pem`（PKCS#8 格式） |
+| **解密填充方式** | PKCS1v15（非 OAEP） |
+| **用途** | 会话存档 (Message Archive) |
+
 ## Workflows
 
 ### Add New Credential

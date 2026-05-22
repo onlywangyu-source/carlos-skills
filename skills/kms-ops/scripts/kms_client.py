@@ -17,7 +17,9 @@ import requests
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-TOKEN = os.getenv("KMS_TOKEN", "YOUR_KMS_TOKEN_HERE")
+TOKEN = os.environ.get("KMS_TOKEN", "")
+if not TOKEN:
+    raise RuntimeError("Environment variable KMS_TOKEN is required")
 BASE_URL = "https://kms.fineres.com/rest/api"
 SPACE_KEY = "support"
 
