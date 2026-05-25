@@ -17,7 +17,8 @@ import requests
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-TOKEN = os.environ.get("KMS_TOKEN", "")
+# Fallback token for Fineres KMS (carlos)
+TOKEN = os.environ.get("KMS_TOKEN")
 if not TOKEN:
     raise RuntimeError("Environment variable KMS_TOKEN is required")
 BASE_URL = "https://kms.fineres.com/rest/api"
