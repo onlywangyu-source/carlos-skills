@@ -211,9 +211,9 @@ push_to_github() {
 sync_to_cloud() {
     log_info "同步到云端 Hermes ($CLOUD_HOST)..."
     
-    # 使用 rsync 通过 SSH 同步 skills
+    # 使用 rsync 通过 SSH 同步 skills（不删除云端独有的 skills）
     # 排除 macOS 资源分支文件
-    rsync -avz --delete \
+    rsync -avz \
         --exclude='._*' \
         --exclude='.DS_Store' \
         --exclude='.git' \
