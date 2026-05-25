@@ -17,7 +17,8 @@ import requests
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-# Fallback token for Fineres KMS (carlos)
+# Token must be provided via environment variable KMS_TOKEN
+# Example: export KMS_TOKEN="your-token-here"
 TOKEN = os.environ.get("KMS_TOKEN")
 if not TOKEN:
     raise RuntimeError("Environment variable KMS_TOKEN is required")
