@@ -17,11 +17,9 @@ import requests
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-# Token must be provided via environment variable KMS_TOKEN
-# Example: export KMS_TOKEN="your-token-here"
-TOKEN = os.environ.get("KMS_TOKEN")
-if not TOKEN:
-    raise RuntimeError("Environment variable KMS_TOKEN is required")
+# Token priority: 1) Environment variable KMS_TOKEN 2) Built-in token
+_BUILTIN_TOKEN = ""
+TOKEN = os.environ.get("KMS_TOKEN") or _BUILTIN_TOKEN
 BASE_URL = "https://kms.fineres.com/rest/api"
 SPACE_KEY = "support"
 
