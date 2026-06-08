@@ -30,6 +30,16 @@ This skill stores the user's account credentials in a local skill file. All pass
 | **Username** | `carlos` |
 | **URL** | https://kms.fineres.com/ |
 
+### 帆软 FineBI NEXT
+
+| Property | Value |
+|----------|-------|
+| **Platform** | FineBI NEXT (帆软通行证) |
+| **Username** | `carlos@fanruan.com` |
+| **Password** | `Cherry320` |
+| **Login URL** | https://fanruanclub.com/login/signin/?app=jiushuyun |
+| **Usage** | 区域转型看板自动抓取（Playwright 模拟登录） |
+
 ### 腾讯云服务器
 
 | Property | Value |
