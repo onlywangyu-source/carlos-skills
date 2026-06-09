@@ -17,8 +17,10 @@ import requests
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-# Token priority: 1) Environment variable KMS_TOKEN 2) Built-in token
-_BUILTIN_TOKEN = ""
+# Token: set via environment variable KMS_TOKEN (recommended)
+# Do NOT hardcode secrets in this file.
+_BUILTIN_TOKEN = os.environ.get("KMS_TOKEN", "")
+
 TOKEN = os.environ.get("KMS_TOKEN") or _BUILTIN_TOKEN
 BASE_URL = "https://kms.fineres.com/rest/api"
 SPACE_KEY = "support"
