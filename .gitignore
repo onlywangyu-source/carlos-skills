@@ -2,3 +2,6 @@
 *.zip
 *.log
 .DS_Store
+
+# Sensitive credentials skill - managed locally only
+password-vault/

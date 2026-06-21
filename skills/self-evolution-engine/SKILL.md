@@ -35,6 +35,14 @@ agent_created: true
 - 用户级 skills：`/Users/wangyu/.workbuddy/skills/`
 - 项目级记忆：`/Users/wangyu/WorkBuddy/wangyu-space/.workbuddy/memory/`
 - 用户级长期记忆：`/Users/wangyu/.workbuddy/MEMORY.md`
+- **Obsidian Vault**：`/Users/wangyu/Documents/Obsidian-Vaults/Carlos-Knowledge`
+- **Obsidian 进化目录**：`99-System/WorkBuddy-Evolution/`（与 `02-知识管理/` 完全隔离）
+  - `_MOC.md`：进化日志索引页
+  - `使用习惯模式.md`：使用习惯维度（追加式，按日期分段）
+  - `问题错误复盘.md`：问题复盘维度（追加式，按日期分段）
+  - `知识缺口识别.md`：知识缺口维度（追加式，按日期分段）
+  - `偏好变化捕捉.md`：偏好变化维度（追加式，按日期分段）
+  - `YYYY-MM-DD-evolution.md`：每次进化的完整报告副本
 
 ---
 
@@ -144,6 +152,74 @@ agent_created: true
   2. 每项变更必须有 ≥2 条明确证据（对话/日志）
   3. 证据不足时，写入"未应用候选"清单，不强行修改
 - 应用后在 CHANGELOG.md 记录完整 diff
+
+### 阶段 4.5：Obsidian 同步（四维度分析结果写入知识库）
+
+将阶段2的四维度分析结果同步到 Obsidian，**与一般知识更新完全隔离**。
+
+#### 4.5.1 前置检查
+- 确认 Obsidian Vault 路径存在：`~/Documents/Obsidian-Vaults/Carlos-Knowledge/`
+- 若 `99-System/WorkBuddy-Evolution/` 不存在，创建之
+
+#### 4.5.2 四维度页面追加（追加式，按日期分段）
+
+对每个维度页面，在文件末尾 **追加** 一个以日期为标题的新段落：
+
+**`使用习惯模式.md`** — 追加内容：
+```markdown
+## YYYY-MM-DD
+### 高频任务类型分布（表格）
+### 常用工具与连接器
+### 工作时段特征
+### 对话深度分布
+### 趋势观察（与前几次对比）
+```
+
+**`问题错误复盘.md`** — 追加内容：
+```markdown
+## YYYY-MM-DD
+### 执行失败或返工的任务（表格：# | 问题 | 日期 | 根因 | 改进措施 | 状态）
+### 重复出现的操作 → 可沉淀为skill的候选
+### 用户明确反馈的边界校正
+### 趋势观察
+```
+
+**`知识缺口识别.md`** — 追加内容：
+```markdown
+## YYYY-MM-DD
+### 缺失的 Skill（已补/待补）
+### 未沉淀的长期记忆（已补/待补）
+### 重复摸索的流程
+### 趋势观察
+```
+
+**`偏好变化捕捉.md`** — 追加内容：
+```markdown
+## YYYY-MM-DD
+### USER.md 画像更新（🟡 中风险）
+### SOUL.md 协作风格更新（🔴 高风险 · 保守增量）
+### IDENTITY.md（未变更说明）
+### 偏好变化趋势观察表
+```
+
+**写入规则**：
+- 每个维度页面是 **纯追加**，不修改历史段落
+- 每次迭代的内容用 `## YYYY-MM-DD` 作为二级标题分段
+- 表格格式统一，方便跨期对比
+- 若某维度本次无发现，写"本期无显著变化"并跳过
+
+#### 4.5.3 进化报告副本
+- 将完整的 `evolution/YYYY-MM-DD-evolution.md` 复制到 Obsidian 的 `99-System/WorkBuddy-Evolution/YYYY-MM-DD-evolution.md`
+- 格式微调：添加 YAML frontmatter 和 Obsidian 内部链接（`[[使用习惯模式]]` 等）
+
+#### 4.5.4 更新索引页 `_MOC.md`
+- 在进化报告归档表格中追加一行：`| 日期 | [[YYYY-MM-DD-evolution]] | 变更数 |`
+- 更新快速导航中的"最新进化报告"链接
+
+#### 4.5.5 写入方式
+- 使用 Write 工具直接写入 Obsidian 路径下的 .md 文件
+- 对于已有文件（四维度页面），先 Read 全文，再 Edit 在末尾追加新段落
+- 对于新文件（首次或首次创建），用 Write 直接创建
 
 ### 阶段 5：生成进化报告
 
