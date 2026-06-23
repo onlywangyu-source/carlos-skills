@@ -1,6 +1,6 @@
-# 腾讯会议 MCP 工具参考
+# 腾讯会议 MCP 工具调用示例
 
-本文件提供所有工具的调用场景、关键规则与示例。详细参数说明已集成到 MCP 工具的 Schema 中，可直接通过工具描述查看。
+本文件提供各工具的调用示例。参数说明已集成到 MCP 工具 Schema 中，可通过 `tools/list` 查看。
 
 ---
 
@@ -25,31 +25,17 @@
   - [查询转写段落](#14-get_transcripts_paragraphs--查询转写段落)
   - [搜索转写内容](#15-search_transcripts--搜索转写内容)
   - [获取智能纪要](#16-get_smart_minutes--获取智能纪要)
+- [录制权限申请](#录制权限申请)
+  - [申请录制权限-预览](#17-apply_record_permission_prepare--申请录制权限-预览)
+  - [申请录制权限-提交](#18-apply_record_permission_commit--申请录制权限-提交)
+- [反馈](#反馈)
+  - [提交反馈（Agent 意见箱）](#19-submit_feedback--提交反馈agent-意见箱)
 
 ---
 
 ## 会议管理
 
 ### 1. `schedule_meeting` — 创建会议
-
-#### 调用场景
-用户要求**预约、创建、安排**一场腾讯会议时使用。
-
-#### ⚠️ 关键规则
-
-**非周期性会议创建**
-- 必须获取：`subject`（会议主题）、`start_time`（开始时间）、`end_time`（结束时间）
-- 若用户未提及结束时间，默认设置为1小时，并提示用户可修改
-- 若缺少会议主题，必须提示用户输入
-
-**周期性会议创建**
-- 必须获取：`subject`、`start_time`、`end_time`、`recurring_type`（周期类型）、`until_count`（重复次数）
-- 若用户未提及重复次数，默认设置为50次，并提示用户可修改
-- 若缺少周期类型，必须提示用户输入
-
-**其他限制**
-- ❌ 不支持邀请人，即使创建成功也不返回邀请人信息
-- ❌ 缺少会议主题时报错
 
 #### 调用示例
 
@@ -85,14 +71,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 2. `update_meeting` — 修改会议
 
-#### 调用场景
-用户要求**修改、更新**已有会议的主题、时间或其他信息时使用。
-
-#### ⚠️ 关键规则
-- 🔴 **强制二次确认**：修改前必须向用户展示要修改的会议信息，用户确认后再执行修改
-- 若用户提供的是**会议号（meeting_code）**而非 meeting_id，先通过 `get_meeting_by_code` 查询 meeting_id
-- 可修改：主题、时间、密码、时区、会议类型、入会限制、等候室、周期性规则等
-
 #### 调用示例
 
 ```bash
@@ -125,15 +103,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 ---
 
 ### 3. `cancel_meeting` — 取消会议
-
-#### 调用场景
-用户要求**取消、删除**已有会议时使用。
-
-#### ⚠️ 关键规则
-- 🔴 **强制二次确认**：取消前必须向用户展示要取消的会议信息，用户确认后再执行取消
-- 若用户提供的是**会议号（meeting_code）**而非 meeting_id，先通过 `get_meeting_by_code` 查询 meeting_id
-- 取消整场周期性会议时，需传入 `meeting_type: 1`
-- 取消周期性会议的某个子会议时，需传入 `sub_meeting_id`
 
 #### 调用示例
 
@@ -169,12 +138,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 4. `get_meeting` — 查询会议详情
 
-#### 调用场景
-用户要求通过 meeting_id **查询会议详情**时使用。
-
-#### ⚠️ 关键规则
-- 返回主持人和参会者时，如果没有特殊要求，只返回用户昵称（不返回用户ID）
-
 #### 调用示例
 
 ```bash
@@ -189,12 +152,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 ---
 
 ### 5. `get_meeting_by_code` — 通过会议号查询
-
-#### 调用场景
-用户提供**会议号（meeting_code）查询会议信息**时使用。
-
-#### ⚠️ 关键规则
-- 此工具常作为其他工具的前置步骤，用于将 meeting_code 转换为 meeting_id
 
 #### 调用示例
 
@@ -213,14 +170,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 6. `get_meeting_participants` — 获取参会成员明细
 
-#### 调用场景
-用户要求查看、询问**实际参会人员、谁参加了会议、参会明细**相关信息时使用。
-
-#### ⚠️ 关键规则
-- 周期性会议必须传入 `sub_meeting_id`（可通过 `get_meeting` 获取 `current_sub_meeting_id`）
-- 当参会成员较多时，使用 `pos` 和 `size` 进行分页查询
-- 根据 `has_remaining` 判断是否需要继续查询
-
 #### 调用示例
 
 ```bash
@@ -229,22 +178,21 @@ python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_meeting_participants",
   "arguments": {
     "meeting_id": "xxx",
-    "size": 20,
-    "pos": 0
+    "page_size": 20
   }
 }'
 
-# 翻页查询（使用上次返回的 next_pos）
+# 翻页查询（使用上次返回的 next_page_token）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_meeting_participants",
   "arguments": {
     "meeting_id": "xxx",
-    "size": 20,
-    "pos": 20
+    "page_size": 20,
+    "page_token": "上一次响应中的next_page_token"
   }
 }'
 
-# 按参会时间过滤（时间区间不超过90天）
+# 按参会时间过滤
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_meeting_participants",
   "arguments": {
@@ -258,13 +206,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 ---
 
 ### 7. `get_meeting_invitees` — 获取受邀成员列表
-
-#### 调用场景
-用户要求查看、询问**受邀成员、邀请了谁**相关信息时使用。
-
-#### ⚠️ 关键规则
-- 返回邀请人时，如果没有特殊要求，只返回用户昵称（不返回用户ID）
-- 根据 `has_remaining` 判断是否需要继续查询
 
 #### 调用示例
 
@@ -281,9 +222,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 8. `get_waiting_room` — 查询等候室成员
 
-#### 调用场景
-用户要求查看、询问**等候室成员**相关信息时使用。
-
 #### 调用示例
 
 ```bash
@@ -291,8 +229,7 @@ python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_waiting_room",
   "arguments": {
     "meeting_id": "xxx",
-    "page_size": 20,
-    "page": 1
+    "page_size": 20
   }
 }'
 ```
@@ -301,18 +238,10 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 9. `get_user_meetings` — 查询用户会议列表
 
-#### 调用场景
-用户要求查看、询问**自己的会议列表、近期会议、我的会议**相关信息时使用。
-
-#### ⚠️ 关键规则
-- ⚠️ 只能查询**即将开始、正在进行中**的会议
-- 若用户需要查询今天的会议，需配合 `get_user_ended_meetings` 使用并做聚合去重
-- 根据 `remaining`、`next_pos`、`next_cursory` 进行翻页查询
-
 #### 调用示例
 
 ```bash
-# 查询即将开始/进行中的会议（pos 和 cursory 均为 ISO 时间字符串）
+# 查询即将开始/进行中的会议
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_user_meetings",
   "arguments": {
@@ -320,12 +249,11 @@ python3 scripts/tencent_meeting.py tools/call '{
   }
 }'
 
-# 翻页查询（remaining 不为0时，使用返回的 next_pos/next_cursory 对应时间）
+# 翻页查询（has_more 为 true 时，使用返回的 next_page_token）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_user_meetings",
   "arguments": {
-    "pos": "2026-03-25T10:00:00+08:00",
-    "cursory": "2026-03-25T10:00:00+08:00",
+    "page_token": "上一次响应中的next_page_token",
     "is_show_all_sub_meetings": 0
   }
 }'
@@ -334,13 +262,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 ---
 
 ### 10. `get_user_ended_meetings` — 查询已结束会议
-
-#### 调用场景
-用户要求查看、询问**已结束的会议、历史会议**相关信息时使用。
-
-#### ⚠️ 关键规则
-- 建议指定 `start_time` 和 `end_time` 缩小查询范围；不传时间时返回默认范围内的历史会议
-- 若用户需要查询今天的会议，需配合 `get_user_meetings` 使用并做聚合去重
 
 #### 调用示例
 
@@ -351,8 +272,18 @@ python3 scripts/tencent_meeting.py tools/call '{
   "arguments": {
     "start_time": "2026-03-25T00:00:00+08:00",
     "end_time": "2026-03-25T23:59:59+08:00",
+    "page_size": 10
+  }
+}'
+
+# 翻页查询
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "get_user_ended_meetings",
+  "arguments": {
+    "start_time": "2026-03-25T00:00:00+08:00",
+    "end_time": "2026-03-25T23:59:59+08:00",
     "page_size": 10,
-    "page_number": 1
+    "page_token": "上一次响应中的next_page_token"
   }
 }'
 ```
@@ -363,25 +294,15 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 11. `get_records_list` — 查询录制列表
 
-#### 调用场景
-用户要求查看**会议录制列表、录制文件、录制回放**时使用。
-
-#### ⚠️ 关键规则
-- 若用户提供的是**会议号（meeting_code）**而非 meeting_id：
-  1. 先通过 `get_meeting_by_code` 查询 meeting_id
-  2. 再通过 `get_records_list` 获取 `record_file_id`（后续操作需要）
-- 可通过时间范围查询，也可通过 meeting_id 或 meeting_code 查询
-
 #### 调用示例
 
 ```bash
-# 按时间范围查询（时间范围不超过31天，起始时间不早于1年前）
+# 按时间范围查询
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_records_list",
   "arguments": {
     "start_time": "2026-03-25T00:00:00+08:00",
     "end_time": "2026-03-25T23:59:59+08:00",
-    "page_number": 1,
     "page_size": 10
   }
 }'
@@ -401,20 +322,22 @@ python3 scripts/tencent_meeting.py tools/call '{
     "meeting_code": "904854736"
   }
 }'
+
+# 翻页查询
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "get_records_list",
+  "arguments": {
+    "start_time": "2026-03-25T00:00:00+08:00",
+    "end_time": "2026-03-25T23:59:59+08:00",
+    "page_size": 10,
+    "page_token": "上一次响应中的next_page_token"
+  }
+}'
 ```
 
 ---
 
 ### 12. `get_record_addresses` — 获取录制下载地址
-
-#### 调用场景
-用户要求获取**录制下载地址、下载录制视频/音频**时使用。
-
-#### ⚠️ 关键规则
-- 若用户提供的是**会议号（meeting_code）**：
-  1. 先通过 `get_meeting_by_code` 查询 meeting_id
-  2. 再通过 `get_records_list` 获取 `meeting_record_id`
-  3. 最后通过 `get_record_addresses` 获取下载地址
 
 #### 调用示例
 
@@ -431,34 +354,34 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 13. `get_transcripts_details` — 查询转写详情
 
-#### 调用场景
-用户要求查看**会议转写全文、转写详情**时使用。
-
-#### ⚠️ 关键规则
-- 若用户提供的是**会议号（meeting_code）**：
-  1. 先通过 `get_meeting_by_code` 查询 meeting_id
-  2. 再通过 `get_records_list` 获取 `record_file_id`
-  3. 最后通过 `get_transcripts_details` 获取转写内容
-- 可通过 `pid` 和 `limit` 参数控制分页
-
 #### 调用示例
 
 ```bash
-# 查询全量转写内容
-python3 scripts/tencent_meeting.py tools/call '{
-  "name": "get_transcripts_details",
-  "arguments": {
-    "record_file_id": "xxx"
-  }
-}'
-
-# 从指定段落开始分页查询（pid 和 limit 均为字符串类型）
+# 查询转写内容（从第0段开始）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_transcripts_details",
   "arguments": {
     "record_file_id": "xxx",
-    "pid": "100",
-    "limit": "50"
+    "pid": "0"
+  }
+}'
+
+# 从指定段落开始查询
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "get_transcripts_details",
+  "arguments": {
+    "record_file_id": "xxx",
+    "pid": "100"
+  }
+}'
+
+# 限制查询段落数
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "get_transcripts_details",
+  "arguments": {
+    "record_file_id": "xxx",
+    "pid": "0",
+    "limit": "10"
   }
 }'
 ```
@@ -466,15 +389,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 ---
 
 ### 14. `get_transcripts_paragraphs` — 查询转写段落
-
-#### 调用场景
-用户要求**分页浏览转写段落**时使用。
-
-#### ⚠️ 关键规则
-- 若用户提供的是**会议号（meeting_code）**：
-  1. 先通过 `get_meeting_by_code` 查询 meeting_id
-  2. 再通过 `get_records_list` 获取 `record_file_id`
-- 返回段落 ID 列表，配合 `get_transcripts_details` 通过 pid 获取具体文本内容
 
 #### 调用示例
 
@@ -490,13 +404,6 @@ python3 scripts/tencent_meeting.py tools/call '{
 ---
 
 ### 15. `search_transcripts` — 搜索转写内容
-
-#### 调用场景
-用户要求在转写内容中**搜索关键词**时使用。
-
-#### ⚠️ 关键规则
-- 中文关键词需要 urlencode
-- 返回匹配的段落 ID、句子 ID 和时间戳信息
 
 #### 调用示例
 
@@ -514,22 +421,10 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### 16. `get_smart_minutes` — 获取智能纪要
 
-#### 调用场景
-用户要求获取**智能纪要、AI纪要、会议总结**时使用。
-
-#### 💡 推荐流程
-当用户**咨询与会议相关的问题**时，按以下优先级获取信息：
-1. 先使用 `get_smart_minutes` 获取智能纪要
-2. 若未找到相关信息，使用 `get_transcripts_details` 获取转写详情
-3. 若仍未找到，使用 `get_record_addresses` 获取录制下载地址，获取完整会议信息
-
-#### ⚠️ 关键规则
-- 支持多语言翻译：`default`（原文）、`zh`（简体中文）、`en`（英文）、`ja`（日语）
-- 若录制文件有密码，需传入 `pwd` 参数
-
 #### 调用示例
 
 ```bash
+# 获取原文智能纪要
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_smart_minutes",
   "arguments": {
@@ -545,11 +440,171 @@ python3 scripts/tencent_meeting.py tools/call '{
     "lang": "en"
   }
 }'
+
+# 录制文件有密码时
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "get_smart_minutes",
+  "arguments": {
+    "record_file_id": "xxx",
+    "pwd": "123456"
+  }
+}'
+```
+
+---
+
+## 录制权限申请
+
+> 录制权限申请采用 **两步流程**：先调用 `apply_record_permission_prepare` 获取预览信息向用户展示并确认，
+> 用户明确同意后再调用 `apply_record_permission_commit` 正式提交。**严禁跳过预览阶段直接提交申请。**
+> 触发场景：用户访问录制相关内容（下载地址/转写/智能纪要）出现无权限错误，或用户主动请求申请录制权限。
+
+### 17. `apply_record_permission_prepare` — 申请录制权限-预览
+
+#### 调用示例
+
+```bash
+# 基础调用：仅传 meeting_record_id
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "apply_record_permission_prepare",
+  "arguments": {
+    "meeting_record_id": "xxx"
+  }
+}'
+
+# 同时携带 meeting_id（推荐，便于服务端校验）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "apply_record_permission_prepare",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "meeting_id": "yyy"
+  }
+}'
+```
+
+#### 返回字段说明
+
+| 字段 | 说明 |
+|------|------|
+| `preview.meeting_record_id` | 会议录制 ID |
+| `preview.approval_name` | 申请类型文案 |
+| `preview.subject` | 会议标题 |
+| `preview.file_owner` | 录制所有者名称 |
+| `preview.apply_note` | 权限申请备注信息 |
+| `preview.applicant` | 申请人名称 |
+| `expires_in` | 预览有效期（秒），接近过期时建议重新调用 |
+
+> **调用后必须**：向用户完整展示预览信息（标题/录制所有者/申请人/申请说明），等待用户明确同意后再调用 commit 工具。
+
+---
+
+### 18. `apply_record_permission_commit` — 申请录制权限-提交
+
+> **前置条件**：已调用 prepare 工具向用户展示预览信息，并获得用户明确同意。
+
+#### 调用示例
+
+```bash
+# 基础调用
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "apply_record_permission_commit",
+  "arguments": {
+    "meeting_record_id": "xxx"
+  }
+}'
+
+# 同时携带 meeting_id
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "apply_record_permission_commit",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "meeting_id": "yyy"
+  }
+}'
+```
+
+#### 返回字段说明
+
+| 字段 | 说明 |
+|------|------|
+| `unique_id` | 申请 ID |
+| `status` | 审批状态 |
+| `message` | 审批状态描述 |
+| `approval_url` | 审批链接（**必须展示给用户**，便于跟进审批进度） |
+| `share_text` | 申请说明描述 |
+
+---
+
+## 反馈
+
+### 19. `submit_feedback` — 提交反馈（Agent 意见箱）
+
+> 由 Agent 调用，用于上报工具缺失、工具报错、能力不足、结果异常或改进建议。
+> 参数定义、枚举、长度限制、关联字段条件必填等约束以工具自身的 MCP schema 为准（通过 `tools/list` 获取）；调用时机与输出规范详见 SKILL.md 场景7。
+
+#### 调用示例
+
+```bash
+# 1. 找不到对应工具
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "submit_feedback",
+  "arguments": {
+    "category": "tool_not_found",
+    "intent": "订阅会议变更事件，实时感知会议被修改/取消"
+  }
+}'
+
+# 2. 调用工具报错
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "submit_feedback",
+  "arguments": {
+    "category": "tool_error",
+    "intent": "查询某场会议的参会成员明细",
+    "actions_tried": "调用 get_meeting_participants(meeting_id=xxx)",
+    "result": "返回 9042 无权限",
+    "tool_name": "get_meeting_participants",
+    "error_code": "9042"
+  }
+}'
+
+# 3. 工具能力/参数不足
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "submit_feedback",
+  "arguments": {
+    "category": "tool_inadequate",
+    "intent": "按时间范围筛选用户的未来会议列表",
+    "actions_tried": "调用 get_user_meetings",
+    "result": "工具不支持 start_time / end_time 参数，无法按时间过滤",
+    "tool_name": "get_user_meetings"
+  }
+}'
+
+# 4. 结果不符预期
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "submit_feedback",
+  "arguments": {
+    "category": "unexpected_result",
+    "intent": "获取某场会议的智能纪要",
+    "actions_tried": "调用 get_smart_minutes(record_file_id=xxx)",
+    "result": "返回空内容，但用户确认会议已生成纪要",
+    "tool_name": "get_smart_minutes"
+  }
+}'
+
+# 5. 一般性建议
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "submit_feedback",
+  "arguments": {
+    "category": "suggestion",
+    "intent": "希望 get_records_list 支持按会议主题模糊搜索"
+  }
+}'
 ```
 
 ---
 
 ## 相关文档
 
-- **SKILL.md** - 完整的工具使用规范与触发场景（时间处理、敏感操作、错误处理等通用规则以 SKILL.md 为准）
-- **api_references.md**（本文档）- 各工具调用场景与示例
+- **SKILL.md** — 完整的业务规范与触发场景（时间处理、敏感操作、错误处理等通用规则以 SKILL.md 为准）
+- **error_dictionary.md** — 错误处理指引
+- **version_management.md** — 版本管理指引

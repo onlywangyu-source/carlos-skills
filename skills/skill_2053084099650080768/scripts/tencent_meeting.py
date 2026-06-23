@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict
 
+import local_tools
 from mcp_proxy import McpProxy
 from utils import get_os_name
 
@@ -173,8 +174,16 @@ def main():
             sys.exit(1)
 
         proxy = McpProxy(user_token, base_url, skill_version)
-        result = proxy.request(method, params)
-        
+
+        # 本地伪工具调用：直接在 Skill 包内处理，不转发到 MCP Server
+        if local_tools.is_local_tool_call(method, params):
+            result = local_tools.handle_local_tool_call(method, params)
+        else:
+            result = proxy.request(method, params)
+            # tools/list：在远端结果中追加本地伪工具，便于模型发现并调用
+            if method == "tools/list":
+                result = local_tools.inject_local_tools(result)
+
         # 打印结果
         # 当method为tools/call时，打印result结果content数组里面对应type=text的text字段
         if method == "tools/call" and "result" in result:

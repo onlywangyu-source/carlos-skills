@@ -19,6 +19,18 @@
 
 ---
 
+## 网络与异常错误
+
+> 当 MCP 工具调用出现网络不通、连接超时、请求失败或其他非预期错误时，按以下指引处理。
+
+| 错误信息 | 问题类型 | 处理指引 |
+|---------|---------|----------|
+| 网络不通 / 连接超时 / Connection refused / URLError / timeout | 网络异常 | 请检查网络环境；若 MCP URL 非 `https://mcp.meeting.tencent.com/mcp/wemeet-open/v1`，可换用该地址重试；仍失败则引导访问 https://meeting.tencent.com/ai-skill?fromSource=troubleshot 重新下载 Skill 或查看开发者文档 |
+| MCP请求失败 / HTTP 请求失败 / 创建请求失败 | 服务连接异常 | 若 MCP URL 非 `https://mcp.meeting.tencent.com/mcp/wemeet-open/v1`，可换用该地址重试；仍失败则引导访问 https://meeting.tencent.com/ai-skill?fromSource=troubleshot 重新下载 Skill 或查看开发者文档 |
+| 其他非预期异常 | 未知异常 | 展示原始错误信息；若 MCP URL 非 `https://mcp.meeting.tencent.com/mcp/wemeet-open/v1`，可换用该地址重试；仍失败则引导访问 https://meeting.tencent.com/ai-skill?fromSource=troubleshot 重新下载 Skill 或查看开发者文档 |
+
+---
+
 ## 通用错误
 
 | 错误信息 | 问题类型 | 处理指引 |
@@ -135,12 +147,12 @@
 
 ### `get_record_addresses` — 获取录制下载地址
 
-| 错误信息 | 问题类型 | 处理指引 |
-|---------|---------|---------|
+| 错误信息 | 问题类型 | 处理指引                                                                        |
+|---------|---------|-----------------------------------------------------------------------------|
 | meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，需通过 `get_records_list` 获取后传入，且必须为非 0 的纯数字（uint64） |
-| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
-| 参数非法，请对照接口文档检查您的参数 | 传参错误 | 检查所有参数格式，`meeting_record_id` 必须为非 0 的纯数字（uint64） |
-| 录制权限校验失败 | 权限问题 | 告知用户没有权限查看该会议的录制，仅限有权限的成员访问 |
+| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取    |
+| 参数非法，请对照接口文档检查您的参数 | 传参错误 | 检查所有参数格式，`meeting_record_id` 必须为非 0 的纯数字（uint64）                            |
+| 录制权限校验失败 | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户没有权限查看该会议的录制，仅限有权限的成员访问                               |
 
 ---
 
@@ -154,7 +166,7 @@
 | 纪要不存在 | 数据不存在 | 该会议的纪要不存在，请确认会议是否已生成转写 |
 | 该录制文件未开启转写 | 操作限制 | 告知用户该录制文件未开启转写功能，无法获取转写内容 |
 | 录制文件已经被删除 | 数据不存在 | 告知用户录制文件已被删除，无法获取转写内容 |
-| oauth corp cannot query minutes | 权限问题 | 告知用户当前账号**暂无权限**使用转写查询工具 |
+| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户当前账号**暂无权限**使用转写查询工具 |
 | 获取会议纪要错误 | 其他问题 | 服务端异常，可稍后重试；若持续失败请联系腾讯会议支持 |
 
 ---
@@ -166,7 +178,7 @@
 | 找不到会议录制文件 | 数据不存在 | 检查 `record_file_id` 是否正确，需通过 `get_records_list` 重新获取 |
 | Invalid RecordFileId | 传参错误 | `record_file_id` 无效，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
 | 纪要不存在 | 数据不存在 | 该会议的纪要不存在，请确认会议是否已生成转写 |
-| oauth corp cannot query minutes | 权限问题 | 告知用户当前账号**暂无权限**使用该工具 |
+| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户当前账号**暂无权限**使用该工具 |
 
 ---
 
@@ -176,7 +188,7 @@
 |---------|---------|---------|
 | 找不到会议录制文件 | 数据不存在 | 检查 `record_file_id` 是否正确，需通过 `get_records_list` 重新获取 |
 | record_file_id is invalid | 传参错误 | `record_file_id` 无效，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
-| oauth corp cannot query minutes | 权限问题 | 告知用户当前账号**暂无权限**使用该工具 |
+| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户当前账号**暂无权限**使用该工具 |
 
 ---
 
@@ -190,3 +202,29 @@
 | 智能化数据生成中 | 其他问题 | 告知用户智能化数据正在生成中，请稍后再试 |
 | 智能化开关已关闭 | 操作限制 | 告知用户智能化功能开关未打开，需前往腾讯会议设置中开启后再使用 |
 | 暂无智能化数据，请重新生成 | 数据不存在 | 告知用户暂无智能化数据，请前往腾讯会议客户端重新生成后再查询 |
+
+---
+
+### `apply_record_permission_prepare` — 申请录制权限-预览
+
+| 错误信息 | 问题类型 | 处理指引 |
+|---------|---------|---------|
+| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，需通过 `get_records_list` 获取后传入，且必须为非 0 的纯数字（uint64） |
+| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
+| 录制不存在 | 数据不存在 | 告知用户该录制不存在或已被删除，无法发起权限申请 |
+| 已有进行中的申请 | 操作限制 | 告知用户该录制存在尚未完结的权限申请，请等待审批结果或前往审批链接查看进度，**不要重复发起申请** |
+| 当前用户已具备录制权限 | 操作限制 | 告知用户当前账号已具备录制权限，无需重复申请，可直接访问对应录制资源 |
+| 录制所有者不允许申请权限 | 权限问题 | 告知用户该录制所有者已关闭权限申请通道，请直接联系录制所有者获取访问权限 |
+
+---
+
+### `apply_record_permission_commit` — 申请录制权限-提交
+
+| 错误信息 | 问题类型 | 处理指引 |
+|---------|---------|---------|
+| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，且必须与 prepare 阶段一致 |
+| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64） |
+| 申请预览已过期 | 操作限制 | 告知用户预览信息已过期，需要**重新调用 `apply_record_permission_prepare`** 获取最新预览并请用户重新确认 |
+| 已有进行中的申请 | 操作限制 | 告知用户该录制存在尚未完结的权限申请，**不要重复提交**，请前往审批链接查看进度 |
+| 当前用户已具备录制权限 | 操作限制 | 告知用户当前账号已具备录制权限，无需重复申请 |
+| 提交申请失败，请稍后重试 | 其他问题 | 服务端异常，告知用户稍后重试；若持续失败请联系腾讯会议支持 |
