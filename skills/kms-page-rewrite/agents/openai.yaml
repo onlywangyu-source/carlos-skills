@@ -1,0 +1,3 @@
+display_name: KMS Page Rewrite
+short_description: Rewrite and compare KMS or Confluence pages with publish-safe review gates.
+default_prompt: Review or restructure this KMS page content, show the meaningful changes, and prepare a publish checklist before any live update.
