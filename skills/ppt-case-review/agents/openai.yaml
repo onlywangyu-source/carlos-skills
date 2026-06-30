@@ -1,0 +1,7 @@
+interface:
+  display_name: "PPT Case Review"
+  short_description: "评审客户成功案例PPT并沉淀playbook"
+  default_prompt: "Use $ppt-case-review to review this customer success case deck with page-level P0/P1/P2 findings."
+
+policy:
+  allow_implicit_invocation: true
