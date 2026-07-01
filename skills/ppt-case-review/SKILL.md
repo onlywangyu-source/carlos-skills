@@ -1,65 +1,103 @@
 ---
 name: ppt-case-review
-description: Use when reviewing customer success, CSM, technical support, or business case PowerPoint decks. Extract slide content, evaluate from Carlos's CSM and management perspective, classify issues as P0/P1/P2, compare multiple cases, and produce a structured review report with scores, highlights, reusable playbook insights, and page-level fixes.
+summary: "客户成功案例PPT结构化评审工作流 - python-pptx提取内容，P0/P1/P2三级问题分级，多方对比输出评审报告"
+description: "标准化客户成功案例PPT的评审流程：用python-pptx提取全部幻灯片文本，基于CSM视角逐页分析，按P0(必须修复)/P1(建议修复)/P2(优化建议)三级分类问题，做多方案横向对比，输出结构化评审报告。从6份客户案例PPT评审中提炼而来。"
+triggers:
+  - PPT评审
+  - 案例评审
+  - 评审PPT
+  - ppt-case-review
+agent_created: true
 ---
 
-# PPT Case Review
+# PPT 案例评审工作流
 
-Use this skill to review customer success case decks, business review decks, CSM methodology decks, or technical support case presentations. The goal is a precise, page-level review that balances criticism with reusable value extraction.
+## 用途
 
-## Review Lens
+标准化客户成功案例PPT的评审流程，确保每次评审产出一致的高质量报告。从 Carlos 评审6份客户案例PPT（敏实、东软、亿联、杰士德、成都铁路局、北京银建）的实践中提炼。
 
-Review from Carlos's role perspective:
+## 评审视角
 
-- Customer success / technical support management.
-- Commercial closure: renewal, expansion, NRR, customer value realization.
-- Methodology reuse: can this become a playbook, benchmark case, or regional enablement asset?
-- Two-score model: distinguish **case sharing quality** from **management reporting quality**.
+始终基于 **Carlos 的角色视角**评审：
+- 客户成功/技术支持团队管理
+- 关注：商业闭环（续约/增购/NRR）、方法论体系化、可复用性、战区推广价值
+- 评价双维度：**案例分享质量分** + **管理汇报质量分**（两者不同）
 
-Do not only check wording. Look for business logic, data口径, narrative completeness, reusable frameworks, and whether the deck can become a benchmark.
+## 执行流程
 
-## Workflow
+### 1. 内容提取
+```python
+from pptx import Presentation
+prs = Presentation(ppt_path)
+for i, slide in enumerate(prs.slides, 1):
+    texts = []
+    for shape in slide.shapes:
+        if shape.has_text_frame:
+            for para in shape.text_frame.paragraphs:
+                text = para.text.strip()
+                if text:
+                    texts.append(text)
+    print(f"=== 第{i}页 ===")
+    print("\n".join(texts))
+```
+- 同时提取备注（slide.notes_slide.notes_text_frame.text）
+- 记录每页的形状类型和布局，用于结构分析
 
-1. **Extract content**
-   - Use `python-pptx` or an equivalent structured parser.
-   - Extract slide text, notes, page numbers, and visible structure.
-   - If visual layout matters, inspect rendered slides or screenshots when available.
+### 2. 逐页分析（三维检查）
+对每页检查三个维度：
+- **数据准确性**：数字口径是否一致？计算逻辑是否可追溯？单位是否统一？
+- **逻辑严谨性**：时间线是否重叠？因果是否成立？概念是否准确？
+- **叙事完整性**：背景→冲突→方案→成果是否完整？归因是否深入？
 
-2. **Review each slide**
-   Check three dimensions:
-   - Data accuracy: metric consistency, units, traceability, calculation logic.
-   - Logic rigor: timeline, cause and effect, concept accuracy, evidence chain.
-   - Narrative completeness: background, conflict, solution, results, attribution.
+### 3. 问题分级
+- **P0（必须修复）**：错别字/数据错误/逻辑硬伤/合规风险——不修复不能对外
+- **P1（建议修复）**：口径不一致/细节缺失/结构可优化——影响专业性
+- **P2（优化建议）**：表达提升/视觉优化/可补充内容——锦上添花
 
-3. **Classify issues**
-   - P0: must fix before external use. Data error, logic hard failure, typo that changes meaning, compliance or factual risk.
-   - P1: should fix. Inconsistent口径, missing evidence, weak structure, unclear page role.
-   - P2: optional improvement. Sharper wording, visual polish, extra context, stronger examples.
+### 4. 亮点提炼
+每份PPT必须提炼出：
+- 2-3个核心亮点（区别于其他案例的独特价值）
+- 1-2个可复用的方法论/框架/概念
+- 1句最具感染力的话
 
-4. **Extract value**
-   Every review should identify:
-   - 2-3 unique strengths.
-   - 1-2 reusable methods, frameworks, concepts, or playbook assets.
-   - One memorable sentence or concept if the deck contains one.
+### 5. 多方横向对比（若评审多份）
+制作对比表格，维度包括：
+- 叙事结构 | 方法论深度 | 数据量化 | 场景颗粒度 | 商业闭环 | 战略高度
+- 用一句话概括每份的独特定位
+- 形成互补关系图（如：敏实=从0到1建能力，东软=从1到100推运营...）
 
-5. **Score separately**
-   - Case sharing quality: audience learning, story, scenario specificity, transferability.
-   - Management reporting quality: business closure, data rigor, decision usefulness, strategic altitude.
+### 6. 输出报告结构
+```markdown
+# PPT评审：{案例名称}
 
-6. **Compare when multiple decks are involved**
-   Compare by narrative structure, methodology depth, quantified evidence, scenario granularity, commercial closure, and strategic altitude.
+## 总体评价
+- 案例分享质量：XX分
+- 管理汇报质量：XX分
+- 一句话总评
 
-## Output
+## P0 问题（必须修复）
+| 页码 | 问题 | 建议 |
 
-Use the report template in `references/report-template.md`. Keep findings page-specific. If a deck has no P0 issues, say that clearly.
+## P1 问题（建议修复）
+| 页码 | 问题 | 建议 |
 
-For reusable evaluation dimensions and examples, read `references/review-rubric.md` when a review needs more consistency or when comparing multiple decks.
+## P2 建议（优化建议）
+| 页码 | 问题 | 建议 |
 
-## Guardrails
+## 核心亮点
+- ...
 
-- Do not invent slide content that was not extracted or visually inspected.
-- If a metric appears inconsistent, cite the exact slide numbers involved.
-- Separate “case sharing” score from “management reporting” score.
-- Give strengths and fix suggestions together; do not produce only criticism.
-- Treat data口径 problems as high priority because they can reverse the conclusion.
-- If the user asks to publish or update a KMS page, stop at the review unless they explicitly confirm publication.
+## 多方对比（若有）
+| 维度 | 案例A | 案例B | ... |
+
+## 改进建议
+- 修复P0后的预期定位
+- 可沉淀为战区资产的点
+```
+
+## 注意事项
+
+- 评审要具体到页码，不泛泛而谈
+- 数据口径问题要指出具体哪几页矛盾
+- 亮点和问题都要给，不能只批评
+- 始终思考"这份材料能否作为战区标杆模板"

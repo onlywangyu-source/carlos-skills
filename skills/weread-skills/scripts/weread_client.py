@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""微信读书 API 客户端 — API Key 已内置，无需重复提供"""
+"""微信读书 API 客户端。
+
+API Key must be provided through the WEREAD_API_KEY environment variable.
+"""
 import os, sys, json, urllib.request, urllib.parse
 
-_BASE_TOKEN = "wrk-Gkfe5LBwSZSqMqxVEXWMMwAA"
-API_KEY = os.environ.get("WEREAD_API_KEY") or _BASE_TOKEN
+API_KEY = os.environ.get("WEREAD_API_KEY")
 BASE_URL = "https://i.weread.qq.com/api/agent/gateway"
 
 def api_post(api_name, **params):
     """调用微信读书 Agent API"""
+    if not API_KEY:
+        raise RuntimeError("WEREAD_API_KEY environment variable is not set")
     body = {"api_name": api_name, "skill_version": "1.0.3"}
     body.update(params)
     data = json.dumps(body, ensure_ascii=False).encode("utf-8")
